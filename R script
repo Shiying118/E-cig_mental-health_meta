@@ -1,0 +1,465 @@
+# Install and load R packages
+install.packages(c("readxl", "metafor", "meta", "dplyr", "tidyr", "stringr", "metasens"))
+if (!require("remotes")) {
+  install.packages("remotes")
+}
+remotes::install_github("MathiasHarrer/dmetar")
+library(readxl)
+library(metafor)
+library(meta)
+library(metasens)
+library(dmetar)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(readr)
+
+#Data preparation
+file_path <- "~/Library/CloudStorage/OneDrive-UniversityofBath/systematic review and meta-analysis/meta-analysis/ecig_intercon.xlsx"
+
+#-----E-CIGARETTE USE AND INTERNALIZING PROBLEMS WITH CONTINUOUS OUTCOMES: DEPRESSION WAS INCLUDED WHEN THE PAPER REPORT MULTIPLE OUTCOMES OF INTEREST-----#
+# Read the sheet 
+ecig_intercon_depre <- read_excel(file_path, sheet = "internalizing_depression")
+names(ecig_intercon_depre)
+ecig_intercon_depre$TE<- as.numeric(ecig_intercon_depre$`standardized regression coefficient`)
+ecig_intercon_depre$seTE <- as.numeric(ecig_intercon_depre$`standardized SE`)
+
+#Meta-analysis
+#Running random-effects meta-analysis using generic inverse variance method and Paule and Mandel for between-study variance names(ecig_intercon_depre)
+Ecig_intercon_depre<- metagen(TE= TE, seTE= seTE, studlab = `ID`, data = ecig_intercon_depre, sm = "β Coefficient", common = FALSE, random = TRUE, method.tau = "PM")
+summary (Ecig_intercon_depre)
+
+#Generating forest plot
+# Set up TIFF device with 800 DPI resolution
+tiff("Ecig_intercon_depre.tiff", width = 26.0, height = 18.0, units = "cm", res = 600, compression = "lzw")
+
+#Generating forest plot for meta-analysis results
+forest(Ecig_intercon_depre, studlab = TRUE, prediction = TRUE, print.tau2 = TRUE, xlim = c(-0.6,0.6), leftlabs = c("ID", "β Coefficient", "SE"), fontfamily = "sans", fontsize = 8, col.predict = "darkgrey", col.predict.lines = "black")
+
+# Close the TIFF device
+dev.off()
+
+#Outliers
+#Finding outliers based on studies for which upper bound of 95% CI is lower than lower bound  pooled effect confidence interval, or lower bound of 95% CI is higher than upper bound of pooled effect.
+Ecig_intercon_depre_out <- find.outliers(Ecig_intercon_depre)
+summary (Ecig_intercon_depre_out)
+
+#Subgroup analysis
+sg_xtype_intercon <- update(Ecig_intercon_depre, subgroup = exp_type, tau.common = FALSE)
+summary(sg_xtype_intercon)
+sg_ctype_intercon <- update(Ecig_intercon_depre, subgroup = comp_type, tau.common = FALSE)
+summary(sg_ctype_intercon)
+sg_ytype_intercon <- update(Ecig_intercon_depre, subgroup = otcm_type, tau.common = FALSE)
+summary(sg_ytype_intercon)
+sg_age_intercon <- update(Ecig_intercon_depre, subgroup = age_grp, tau.common = FALSE)
+summary(sg_age_intercon)
+sg_pop_intercon <- update(Ecig_intercon_depre, subgroup = pop_type, tau.common = FALSE)
+summary(sg_pop_intercon)
+
+#Meta-regression
+#Not run for % female due to high missing data and typically only reported for whole sample (i.e. may not represent exposure level used in main meta-analysis)
+metareg(Ecig_intercon_depre, ~flw_up)
+metareg(Ecig_intercon_depre, ~smpsize)
+
+#Meta-biases
+#LFK and Doi plot
+lfk.Ecig_intercon <- lfkindex(ecig_intercon_depre$`standardized regression coefficient`, ecig_intercon_depre$`standardized SE`, data = ecig_intercon_depre)
+doiplot(lfk.Ecig_intercon, xlab = "β Coefficient", pos.lfkindex = 9)
+
+#-----E-CIGARETTE USE AND INTERNALIZING PROBLEMS WITH CONTINUOUS OUTCOMES: ANXIETY WAS INCLUDED WHEN THE PAPER REPORT MULTIPLE OUTCOMES OF INTEREST----#
+#Read the sheet 
+ecig_intercon_anxie<- read_excel(file_path, sheet = "internalizing_anxiety")
+names(ecig_intercon_anxie)
+ecig_intercon_anxie$TE<- as.numeric(ecig_intercon_anxie$`standardized regression coefficient`)
+ecig_intercon_anxie$seTE <- as.numeric(ecig_intercon_anxie$`standardized SE`)
+
+#Meta-analysis
+#Running random-effects meta-analysis using generic inverse variance method and Paule and Mandel for between-study variance names(dat_raw2)
+Ecig_intercon_anxie<- metagen(TE= TE, seTE= seTE, studlab = `ID`, data = ecig_intercon_anxie, sm= "β Coefficient", common = FALSE, random = TRUE, method.tau = "PM")
+summary (Ecig_intercon_anxie)
+
+#Generating forest plot
+# Set up TIFF device with 800 DPI resolution
+tiff("Ecig_intercon_anxie.tiff", width = 26.0, height = 18.0, units = "cm", res = 600, compression = "lzw")
+
+#Generating forest plot for meta-analysis results
+forest(Ecig_intercon_anxie, studlab = TRUE, prediction = TRUE, print.tau2 = TRUE, xlim = c(-0.6,0.6), leftlabs = c("ID", "β Coefficient", "SE"), fontfamily = "sans", fontsize = 8, col.predict = "darkgrey", col.predict.lines = "black")
+
+# Close the TIFF device
+dev.off()
+
+#Outliers
+#Finding outliers based on studies for which upper bound of 95% CI is lower than lower bound  pooled effect confidence interval, or lower bound of 95% CI is higher than upper bound of pooled effect.
+Ecig_intercon_anxie_out <- find.outliers(Ecig_intercon_anxie)
+summary (Ecig_intercon_anxie_out)
+
+#Subgroup analysis
+sg_xtype_intercon <- update(Ecig_intercon_anxie, subgroup = exp_type, tau.common = FALSE)
+summary(sg_xtype_intercon)
+sg_ctype_intercon <- update(Ecig_intercon_anxie, subgroup = comp_type, tau.common = FALSE)
+summary(sg_ctype_intercon)
+sg_ytype_intercon <- update(Ecig_intercon_anxie, subgroup = otcm_type, tau.common = FALSE)
+summary(sg_ytype_intercon)
+sg_age_intercon <- update(Ecig_intercon_anxie, subgroup = age_grp, tau.common = FALSE)
+summary(sg_age_intercon)
+sg_pop_intercon <- update(Ecig_intercon_anxie, subgroup = pop_type, tau.common = FALSE)
+summary(sg_pop_intercon)
+
+#Meta-regression
+#Not run for % female due to high missing data and typically only reported for whole sample (i.e. may not represent exposure level used in main meta-analysis)
+metareg(Ecig_intercon_anxie, ~flw_up)
+metareg(Ecig_intercon_anxie, ~smpsize)
+
+#Meta-biases
+#LFK and Doi plot
+lfk.Ecig_intercon_depress <- lfkindex(ecig_intercon_depre$`standardized regression coefficient`, ecig_intercon_depre$`standardized SE`, data = ecig_intercon_depre)
+doiplot(lfk.Ecig_intercon_depress, xlab = "β Coefficient", pos.lfkindex = 9)
+
+#Meta-biases
+#LFK and Doi plot
+lfk.Ecig_intercon_anxie <- lfkindex(ecig_intercon_anxie$`standardized regression coefficient`, ecig_intercon_anxie$`standardized SE`, data = ecig_intercon_anxie)
+doiplot(lfk.Ecig_intercon_anxie, xlab = "β Coefficient", pos.lfkindex = 9)
+
+#-----E-CIGARETTE USE AND INTERNALIZING PROBLEMS WITH DICHOTOMOUS OUTCOMES: DEPRESSION WAS INCLUDED WHEN THE PAPER REPORT MULTIPLE OUTCOMES OF INTEREST----#
+#Data preparation
+file_path <- "~/Library/CloudStorage/OneDrive-UniversityofBath/systematic review and meta-analysis/meta-analysis/ecig_interndicho.xlsx"
+#Read the sheet 
+ecig_interdicho_depre<- read_excel(file_path, sheet = "internalizing-dichotomous depre")
+
+##-----WITHIN-STUDY POOLING FOR GENDER COMBINATION USING RANDON-EFFECT INVERSE VARIANCE META-ANALYSIS----##
+ecig_interdicho_depre$TE<- as.numeric(ecig_interdicho_depre$`Adjusted log_RR`)
+ecig_interdicho_depre$seTE <- as.numeric(ecig_interdicho_depre$`Adjusted log_SE`)
+dat_combined_depress <- ecig_interdicho_depre %>%
+  group_by(`ID`) %>%
+  group_modify(~{
+    
+    res <- rma(
+      yi     = .x$TE,
+      sei    = .x$seTE,
+      method = "PM"
+    )
+    
+    tibble(
+      TE   = as.numeric(res$b),
+      seTE = res$se,
+      tau2 = res$tau2
+    )
+  }) %>%
+  ungroup()
+
+#META-ANALYSIS
+#Running random-effects meta-analysis using generic inverse variance method and Paule and Mandel for between-study variance names(dat_raw)
+names(dat_combined_depress)
+Ecig_interndicho_depre<- metagen(TE= TE, seTE= seTE, studlab = `ID`, data = dat_combined_depress, sm= "RR", common = FALSE, random = TRUE, method.tau = "PM")
+summary (Ecig_interndicho_depre)
+
+#GENERATING FOREST PLOT
+# Set up TIFF device with 800 DPI resolution
+tiff("Ecig_interndicho_depre.tiff", width = 30.0, height = 18.0, units = "cm", res = 600, compression = "lzw")
+
+#Generating forest plot for meta-analysis results
+forest(Ecig_interndicho_depre, studlab = TRUE, prediction = TRUE, print.tau2 = TRUE, xlim = c(0.1,10), leftlabs = c("ID", "log_RR", "SE"), fontfamily = "sans", fontsize = 8, col.predict = "darkgrey", col.predict.lines = "black")
+
+# Close the TIFF device
+dev.off()
+
+#Outliers
+#Finding outliers based on studies for which upper bound of 95% CI is lower than lower bound  pooled effect confidence interval, or lower bound of 95% CI is higher than upper bound of pooled effect.
+Ecig_interndicho_depre_out<- find.outliers(Ecig_interndicho_depre)
+summary (Ecig_interndicho_depre)
+
+# Remove outlier studies from the data
+Ecig_interndicho_depre_clean<- ecig_intercon_depre %>%
+  filter(!`ID` %in% c("Conway 2025 A"))
+
+# Re-run meta-analysis
+Ecig_interdicho_depre_clean<- metagen(TE = TE, seTE = seTE, studlab = `ID`, data = Ecig_interndicho_depre_clean, sm = "RR", common = FALSE, random = TRUE, method.tau = "PM")
+
+#Generating forest plot
+# Set up TIFF device with 800 DPI resolution
+tiff("Ecig_interdicho_depre_clean.tiff", width = 30.0, height = 18.0, units = "cm", res = 600, compression = "lzw")
+
+#Generating forest plot for meta-analysis results
+forest(Ecig_interdicho_depre_clean, studlab = TRUE, prediction = TRUE, print.tau2 = TRUE, xlim = c(0.1,10), leftlabs = c("ID", "log_RR", "SE"), fontfamily = "sans", fontsize = 8, col.predict = "darkgrey", col.predict.lines = "black")
+
+# Close the TIFF device
+dev.off()
+
+
+#-----E-CIGARETTE USE AND INTERNALIZING PROBLEMS WITH DICHOTOMOUS OUTCOMES: ANXIETY WAS INCLUDED WHEN THE PAPER REPORT MULTIPLE OUTCOMES OF INTEREST----#
+#Read the sheet 
+ecig_interdicho_anxie<- read_excel(file_path, sheet = "internalizing-dichotomous anxie")
+
+##-----WITHIN-STUDY POOLING FOR GENDER COMBINATION USING RANDON-EFFECT INVERSE VARIANCE META-ANALYSIS----##
+ecig_interdicho_anxie$TE<- as.numeric(ecig_interdicho_anxie$`Adjusted log_RR`)
+ecig_interdicho_anxie$seTE <- as.numeric(ecig_interdicho_anxie$`Adjusted log_SE`)
+dat_combined_anxie <- ecig_interdicho_anxie %>%
+  group_by(`ID`) %>%
+  group_modify(~{
+    
+    res <- rma(
+      yi     = .x$TE,
+      sei    = .x$seTE,
+      method = "PM"
+    )
+    
+    tibble(
+      TE   = as.numeric(res$b),
+      seTE = res$se,
+      tau2 = res$tau2
+    )
+  }) %>%
+  ungroup()
+
+#Meta_analysis
+#Running random-effects meta-analysis using generic inverse variance method and Paule and Mandel for between-study variance names(dat_raw)
+names(dat_combined_anxie)
+Ecig_interndicho_anxie<- metagen(TE= TE, seTE= seTE, studlab = `ID`, data = dat_combined_anxie, sm= "RR", common = FALSE, random = TRUE, method.tau = "PM")
+summary (Ecig_interndicho_anxie)
+
+#Generating forest plot
+# Set up TIFF device with 800 DPI resolution
+tiff("Ecig_interndicho_anxie.tiff", width = 30.0, height = 18.0, units = "cm", res = 600, compression = "lzw")
+
+#Generating forest plot for meta-analysis results
+forest(Ecig_interndicho_anxie, studlab = TRUE, prediction = TRUE, print.tau2 = TRUE, xlim = c(0.1,10), leftlabs = c("ID", "log_RR", "SE"), fontfamily = "sans", fontsize = 8, col.predict = "darkgrey", col.predict.lines = "black")
+
+# Close the TIFF device
+dev.off()
+
+#Outliers
+#Finding outliers based on studies for which upper bound of 95% CI is lower than lower bound  pooled effect confidence interval, or lower bound of 95% CI is higher than upper bound of pooled effect.
+Ecig_interndicho_anxie_out<- find.outliers(Ecig_interndicho_anxie)
+summary (Ecig_interndicho_anxie)
+
+metainf(Ecig_interndicho_anxie)
+
+#----E-CIGARETTE USE AND INTERNALIZING PROBLESM WITH DICHOTOMOUS OUTCOMES----"
+#Read the sheet 
+ecig_interdicho <- read_excel(file_path, sheet = "internalizing-dichotomous meta")
+
+#Exclude studies starting with "Conway" since it includes subgroup analysis by gender
+library(dplyr)
+ecig_interdicho_clean<- ecig_interdicho %>%
+  filter(!grepl("^Conway", `ID`))
+
+#Fixed-effect inverse-variance pooling
+ecig_interdicho$TE<- as.numeric(ecig_interdicho$`Adjusted log_RR`)
+ecig_interdicho$seTE<- as.numeric(ecig_interdicho$`Adjusted log_SE`)
+dat_no_conway <- ecig_interdicho_clean %>%
+  group_by(ID) %>%
+  summarise(
+    TE   = sum(TE / seTE^2) / sum(1 / seTE^2),
+    seTE = sqrt(1 / sum(1 / seTE^2)),
+    .groups = "drop"
+  )
+
+names(dat_no_conway)
+
+# Random-effects pooling (Paule–Mandel) for gender
+#Combining data_no_conway and ecig_interdicho soly including conway
+dat_with_conway<- ecig_interdicho %>%
+  filter(grepl("^Conway", ID))
+library(dplyr)
+dat_combined_interdicho<- bind_rows(
+  dat_no_conway,
+  dat_with_conway
+)
+dat_pooled_interdicho<- dat_combined_interdicho %>%
+  group_by(`ID`) %>%
+  group_modify(~{
+    
+    res <- rma(
+      yi     = .x$TE,
+      sei    = .x$seTE,
+      method = "PM"
+    )
+    
+    tibble(
+      TE   = as.numeric(res$b),
+      seTE = res$se,
+      tau2 = res$tau2
+    )
+  }) %>%
+  ungroup()
+
+names(dat_pooled_interdicho)
+summary(dat_pooled_interdicho)
+
+#Meta-analysis
+##Generate a new EXCEL sheet with updated effect estimates after pooling estimates
+#Running random-effects meta-analysis using generic inverse variance method and Paule and Mandel for between-study variance names(dat_raw)
+dat_generated <- read_excel(file_path, sheet = "internalizing-dichotomous sub")
+names(dat_generated)
+dat_generated$TE<- as.numeric(dat_generated$`Adjusted log_RR`)
+dat_generated$seTE<- as.numeric(dat_generated$`Adjusted log_SE`)
+Ecig_internalizing_dicho<- metagen(
+  TE = dat_generated$TE,
+  seTE = dat_generated$seTE,
+  studlab = dat_generated$`ID`,
+  data = dat_generated,
+  sm = "RR",
+  common = FALSE,
+  random = TRUE,
+  method.tau = "PM"
+)
+summary (Ecig_internalizing_dicho)
+
+#Generating forest plot
+# Set up TIFF device with 600 DPI resolution
+tiff("Ecig_internalizing_dicho.tiff", width = 30, height = 18, units = "cm", res = 600)
+
+#Generating forest plot for meta-analysis results
+forest(Ecig_internalizing_dicho,
+       studlab = TRUE,
+       prediction = TRUE,
+       print.tau2 = TRUE,
+       xlim = c(0.1,10),
+       leftlabs = c("ID", "log_RR", "SE"),
+       fontfamily = "sans",
+       fontsize = 8,
+       col.predict = "darkgrey",
+       col.predict.lines = "black")
+dev.off()
+
+# Close the TIFF device
+dev.off()
+
+#OUTLIERS
+#Finding outliers based on studies for which upper bound of 95% CI is lower than lower bound  pooled effect confidence interval, or lower bound of 95% CI is higher than upper bound of pooled effect.
+Ecig_internalizing_dicho_out<- find.outliers(Ecig_internalizing_dicho)
+summary (Ecig_internalizing_dicho)
+metainf(Ecig_internalizing_dicho)
+
+#Subgroup analysis
+sg_xtype_interdicho<- update(Ecig_internalizing_dicho, subgroup = exp_type, tau.common = FALSE)
+summary(sg_xtype_interdicho)
+sg_ctype_interdicho<- update(Ecig_internalizing_dicho, subgroup = comp_type, tau.common = FALSE)
+summary(sg_ctype_interdicho)
+sg_ytype_interdicho<- update(Ecig_internalizing_dicho, subgroup = otcm_type, tau.common = FALSE)
+summary(sg_ytype_interdicho)
+sg_age_interdicho<- update(Ecig_internalizing_dicho, subgroup = age_grp, tau.common = FALSE)
+summary(sg_age_interdicho)
+sg_pop_interdicho<- update(Ecig_internalizing_dicho, subgroup = pop_type, tau.common = FALSE)
+summary(sg_pop_interdicho)
+sg_confounding_interdicho<- update(Ecig_internalizing_dicho, subgroup = confounding_bias, tau.common = FALSE)
+summary(sg_confounding_interdicho)
+
+#META-REGRESSION
+#Not run for % female due to high missing data and typically only reported for whole sample (i.e. may not represent exposure level used in main meta-analysis)
+metareg(Ecig_internalizing_dicho, ~flw_up)
+metareg(Ecig_internalizing_dicho, ~smpsize)
+
+#Meta_bias
+#LFK and Doi plot
+lfk.Ecig_internalizing_dicho <- lfkindex(dat_generated$TE, dat_generated$seTE, data = dat_generated)
+doiplot(lfk.Ecig_internalizing_dicho,xlab = "ln(RR)", pos.lfkindex = 9)
+
+#Sensitivity analysis with excluding papers reporting prevalence outcomes
+dat_no_prev <- subset(dat_generated, otcm_mrs!= "Prevalence with adjusted baseline outcome")
+summary(dat_no_prev)
+dat_no_prev$TE<- as.numeric(dat_no_prev$`Adjusted log_RR`)
+dat_no_prev$seTE <- as.numeric(dat_no_prev$`Adjusted log_SE`)
+sensitivity_model <- metagen(
+  TE = dat_no_prev$TE,
+  seTE = dat_no_prev$seTE,
+  studlab = dat_no_prev$`ID`,
+  data = dat_no_prev,
+  sm = "RR",
+  common = FALSE,
+  random = TRUE,
+  method.tau = "PM"
+)
+summary (sensitivity_model)
+
+#GENERATING FOREST PLOT
+# Set up TIFF device with 600 DPI resolution
+tiff("sensitivity_model.tiff", width = 30, height = 18, units = "cm", res = 600)
+
+#Generating forest plot for sensitivity analysis results
+forest(sensitivity_model,
+       studlab = TRUE,
+       prediction = TRUE,
+       print.tau2 = TRUE,
+       xlim = c(0.1,10),
+       leftlabs = c("ID", "log_RR", "SE"),
+       fontfamily = "sans",
+       fontsize = 8,
+       col.predict = "darkgrey",
+       col.predict.lines = "black")
+dev.off()
+
+# Close the TIFF device
+dev.off()
+
+#----E-CIGARETTE USE AND INCIDENT EXTERNALIZING PROBLEMS----"
+#Data preparation
+file_path <- "~/Library/CloudStorage/OneDrive-UniversityofBath/systematic review and meta-analysis/meta-analysis/ecig_exterdicho.xlsx"
+
+#Read the sheet 
+ecig_exterdicho<- read_excel(file_path, sheet = "externalizing-dichotomous")
+
+#Within-study pooling
+ecig_exterdicho$TE<- as.numeric(ecig_exterdicho$`Adjusted log_RR`)
+ecig_exterdicho$seTE <- as.numeric(ecig_exterdicho$`Adjusted log_SE`)
+dat_pooled_exterdicho<- ecig_exterdicho %>%
+  group_by(`ID`) %>%
+  group_modify(~{
+    
+    res <- rma(
+      yi     = .x$TE,
+      sei    = .x$seTE,
+      method = "PM"
+    )
+    
+    tibble(
+      TE   = as.numeric(res$b),
+      seTE = res$se,
+      tau2 = res$tau2
+    )
+  }) %>%
+  ungroup()
+
+#Generate a new EXCEL sheet with pooled effect estimate
+#Run random-effects meta-analysis using generic inverse variance method and Paule and Mandel for between-study variance
+#Read the sheet 
+ecig_exterdicho2<- read_excel(file_path, sheet = "externalizing-dichotomous meta")
+ecig_exterdicho2$TE<- as.numeric(ecig_exterdicho2$`Adjusted log_RR`)
+ecig_exterdicho2$seTE <- as.numeric(ecig_exterdicho2$`Adjusted log_SE`)
+ecig_exterdicho2<- metagen(
+  TE = ecig_exterdicho2$TE,
+  seTE = ecig_exterdicho2$seTE,
+  studlab = ecig_exterdicho2$`ID`,
+  sm = "RR",
+  comb.fixed = FALSE,
+  comb.random = TRUE,
+  method.tau = "PM"
+)
+summary (ecig_exterdicho2)
+
+#GENERATING FOREST PLOT
+# Set up TIFF device with 600 DPI resolution
+tiff("Ecig_externalizing_dicho.tiff", width = 30, height = 18, units = "cm", res = 600)
+
+#Generating forest plot for meta-analysis results
+forest(ecig_exterdicho2,
+       studlab = TRUE,
+       prediction = TRUE,
+       print.tau2 = TRUE,
+       xlim = c(0.1,10),
+       leftlabs = c("ID", "log_RR", "SE"),
+       fontfamily = "sans",
+       fontsize = 8,
+       col.predict = "darkgrey",
+       col.predict.lines = "black")
+dev.off()
+
+# Close the TIFF device
+dev.off()
+
+#Outliers
+#Finding outliers based on studies for which upper bound of 95% CI is lower than lower bound  pooled effect confidence interval, or lower bound of 95% CI is higher than upper bound of pooled effect.
+Ecig_externalizing_dicho_out<- find.outliers(ecig_exterdicho2)
+summary (Ecig_externalizing_dicho)
+
+
